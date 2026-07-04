@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modeling Decision Guide — Econometrics + ML</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --bg-card: #181b24;
+    --bg-sidebar: #14161e;
+    --border: #2a2d3a;
+    --text: #d1d5e0;
+    --text-muted: #8b90a0;
+    --text-heading: #f0f2f8;
+    --accent: #6c8cff;
+    --green: #4ade80;
+    --green-dim: #1a3a28;
+    --green-border: #2d5a3f;
+    --yellow: #facc15;
+    --yellow-dim: #3a3420;
+    --yellow-border: #5a5030;
+    --red: #f87171;
+    --red-dim: #3a1c1c;
+    --red-border: #5a2d2d;
+    --code-bg: #1e2030;
+    --code-text: #a5b4fc;
+    --tag-bg: #252838;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.65;
+    font-size: 14px;
+  }
+
+  /* ── Layout ─────────────────────────────────── */
+  .layout {
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ── Sidebar ────────────────────────────────── */
+  .sidebar {
+    position: sticky;
+    top: 0;
+    left: 0;
+    width: 280px;
+    min-width: 280px;
+    height: 100vh;
+    overflow-y: auto;
+    background: var(--bg-sidebar);
+    border-right: 1px solid var(--border);
+    padding: 32px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 100;
+  }
+
+  .sidebar-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .sidebar a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s;
+    border-left: 3px solid transparent;
+  }
+
+  .sidebar a:hover {
+    background: var(--tag-bg);
+    color: var(--text-heading);
+  }
+
+  .sidebar a .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .dot-green { background: var(--green); }
+  .dot-yellow { background: var(--yellow); }
+  .dot-red { background: var(--red); }
+
+  /* ── Questions Block ─────────────────────────── */
+  .questions-block {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  .questions-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 14px;
+  }
+
+  .questions-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .questions-list li {
+    font-size: 12px;
+    color: var(--text-muted);
+    padding-left: 18px;
+    position: relative;
+    line-height: 1.5;
+  }
+
+  .questions-list li::before {
+    content: attr(data-n);
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-weight: 700;
+    color: var(--red);
+    font-size: 11px;
+  }
+
+  /* ── Main Content ────────────────────────────── */
+  .main {
+    flex: 1;
+    padding: 40px 48px;
+    max-width: 960px;
+  }
+
+  .main h1 {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--text-heading);
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+  }
+
+  .main .subtitle {
+    color: var(--text-muted);
+    font-size: 15px;
+    margin-bottom: 40px;
+  }
+
+  /* ── Section / Card ─────────────────────────── */
+  .section {
+    margin-bottom: 48px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .section-number {
+    font-size: 11px;
+    font-weight: 700;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .level-green .section-number { background: var(--green-dim); color: var(--green); border: 1px solid var(--green-border); }
+  .level-yellow .section-number { background: var(--yellow-dim); color: var(--yellow); border: 1px solid var(--yellow-border); }
+  .level-red .section-number { background: var(--red-dim); color: var(--red); border: 1px solid var(--red-border); }
+
+  .section-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-heading);
+    letter-spacing: -0.3px;
+  }
+
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 28px 32px;
+  }
+
+  .level-green .card { border-left: 3px solid var(--green); }
+  .level-yellow .card { border-left: 3px solid var(--yellow); }
+  .level-red .card { border-left: 3px solid var(--red); }
+
+  /* ── Card Inner ──────────────────────────────── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px 32px;
+  }
+
+  .card-field h4 {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .card-field p,
+  .card-field ul {
+    font-size: 13.5px;
+    color: var(--text);
+    line-height: 1.65;
+  }
+
+  .card-field ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .card-field ul li::before {
+    content: '—';
+    color: var(--text-muted);
+    margin-right: 6px;
+  }
+
+  .card-full {
+    grid-column: 1 / -1;
+  }
+
+  code {
+    font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+    font-size: 12.5px;
+    background: var(--code-bg);
+    color: var(--code-text);
+    padding: 2px 7px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px 18px;
+    margin-top: 6px;
+    overflow-x: auto;
+  }
+
+  .code-block code {
+    background: none;
+    padding: 0;
+    font-size: 12px;
+    line-height: 1.7;
+    white-space: pre;
+  }
+
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 4px;
+    background: var(--tag-bg);
+    color: var(--text-muted);
+    margin-right: 4px;
+    margin-bottom: 4px;
+  }
+
+  .tag-green { background: var(--green-dim); color: var(--green); }
+  .tag-yellow { background: var(--yellow-dim); color: var(--yellow); }
+  .tag-red { background: var(--red-dim); color: var(--red); }
+
+  .diagnostics-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 6px;
+  }
+
+  .diag-item {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    font-size: 13px;
+  }
+
+  .diag-item strong {
+    color: var(--accent);
+    min-width: 90px;
+  }
+
+  /* ── Responsive ──────────────────────────────── */
+  @media (max-width: 1199px) {
+    .sidebar { display: none; }
+    .main { padding: 32px 24px; max-width: 100%; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- ═══════════════ SIDEBAR ═══════════════ -->
+<nav class="sidebar">
+  <div class="sidebar-title">Modeling Decision Guide</div>
+  <a href="#ols"><span class="dot dot-green"></span>OLS Regression</a>
+  <a href="#gls"><span class="dot dot-green"></span>GLS / WLS / Robust SE</a>
+  <a href="#logit"><span class="dot dot-green"></span>Logit / Probit</a>
+  <a href="#ordered"><span class="dot dot-yellow"></span>Ordered Logit / Probit</a>
+  <a href="#grouped"><span class="dot dot-yellow"></span>Grouped Logit</a>
+  <a href="#poisson"><span class="dot dot-yellow"></span>Poisson / Neg. Binomial</a>
+  <a href="#panel"><span class="dot dot-yellow"></span>Panel Models (FE/RE)</a>
+  <a href="#timeseries"><span class="dot dot-yellow"></span>Time Series (ARIMA/VAR)</a>
+  <a href="#tree"><span class="dot dot-red"></span>Tree / RF / XGBoost</a>
+  <a href="#selection"><span class="dot dot-yellow"></span>Model Selection</a>
+
+  <div class="questions-block">
+    <div class="questions-title">7 Questions Before Modeling</div>
+    <ol class="questions-list">
+      <li data-n="1.">What's the business question / hypothesis?</li>
+      <li data-n="2.">Why THIS algorithm? (compare ≥2 alternatives)</li>
+      <li data-n="3.">Why THESE hyperparameters?</li>
+      <li data-n="4.">Why THESE variables?</li>
+      <li data-n="5.">How GOOD is the expected result? (cite author)</li>
+      <li data-n="6.">How BAD is acceptable? (threshold)</li>
+      <li data-n="7.">When to retrain?</li>
+    </ol>
+  </div>
+</nav>
+
+<!-- ═══════════════ MAIN ═══════════════ -->
+<main class="main">
+  <h1>Modeling Decision Guide</h1>
+  <p class="subtitle">Econometrics + ML — a reference card for the working economist. Flow: basic → advanced.</p>
+
+  <!-- ─────────── 1. OLS ─────────── -->
+  <div id="ols" class="section level-green">
+    <div class="section-header">
+      <span class="section-number">01</span>
+      <h2 class="section-title">OLS Regression</h2>
+    </div>
+    <div class="card">
+      <div class="card-grid">
+        <div class="card-field">
+          <h4>When to Use</h4>
+          <p>Continuous outcome. Exploring linear relationships, causal inference (with identification strategy), baseline for comparison.</p>
+        </div>
+        <div class="card-field">
+          <h4>Key Assumptions</h4>
+          <ul>
+            <li>Linearity in parameters</li>
+            <li>Exogeneity: E[ε|X] = 0</li>
+            <li>Homoscedasticity, no autocorrelation</li>
+            <li>Full rank, normal errors (for inference)</li>
+          </ul>
+        </div>
+        <div class="card-field">
+          <h4>Python</h4>
+          <div class="code-block"><code>import statsmodels.api as sm
+
+model = sm.OLS(y, X).fit(
+    cov_type='HC1'          # robust SE
+)
+print(model.summary())</code></div>
+          <p style="margin-top:8px;"><span class="tag">statsmodels</span> <span class="tag">fit_intercept</span> <span class="tag">cov_type</span></p>
+        </div>
+        <div class="card-field">
+          <h4>Diagnostics</h4>
+          <div class="diagnostics-grid">
+            <div class="diag-item"><strong>R²</strong> Explained variance (0–1)</div>
+            <div class="diag-item"><strong>F-test</strong> Joint significance of regressors</div>
+            <div class="diag-item"><strong>Breusch-Pagan</strong> Heteroscedasticity (p &lt; 0.05 → reject H₀ of homoscedasticity)</div>
+            <div class="diag-item"><strong>VIF</strong> Multicollinearity (&gt; 10 = concern)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────── 2. GLS / WLS / Robust SE ─────────── -->
+  <div id="gls" class="section level-green">
+    <div class="section-header">
+      <span class="section-number">02</span>
+      <h2 class="section-title">GLS / WLS / Robust SE</h2>
+    </div>
+    <div class="card">
+      <div class="card-grid">
+        <div class="card-field">
+          <h4>When to Use</h4>
+          <p>OLS estimates are unbiased but <strong>standard errors are wrong</strong>: heteroscedasticity (cross-section), autocorrelation (time series), or unequal precision across observations.</p>
+        </div>
+        <div class="card-field">
+          <h4>Key Assumptions</h4>
+          <ul>
+            <li>Mean function is correct (same as OLS)</li>
+            <li>Variance structure is misspecified under OLS</li>
+            <li>GLS: full knowledge of Ω (variance matrix)</li>
+            <li>WLS: weights proportional to 1/Var(εᵢ)</li>
+          </ul>
+        </div>
+        <div class="card-field">
+          <h4>Python</h4>
+          <div class="code-block"><code>import statsmodels.api as sm
+
+# Robust SE (Huber-White)
+m_robust = sm.OLS(y, X).fit(cov_type='HC1')
+
+# HAC (Newey-West for autocorrelation)
+m_hac = sm.OLS(y, X).fit(
+    cov_type='HAC',
+    cov_kwds={'maxlags': 4}
+)
+
+# WLS
+weights = 1 / X_var
+m_wls = sm.WLS(y, X, weights=weights).fit()
+
+# GLS
+m_gls = sm.GLS(y, X, sigma=Omega).fit()</code></div>
+          <p style="margin-top:8px;"><span class="tag">HC1</span> <span class="tag">HC3</span> <span class="tag">HAC</span> <span class="tag">Newey-West</span></p>
+        </div>
+        <div class="card-field">
+          <h4>Diagnostics</h4>
+          <div class="diagnostics-grid">
+            <div class="diag-item"><strong>White test</strong> General heteroscedasticity</div>
+            <div class="diag-item"><strong>BP test</strong> Breusch-Pagan for form</div>
+            <div class="diag-item"><strong>DW statistic</strong> First-order autocorrelation</div>
+            <div class="diag-item"><strong>LM test</strong> Serial correlation (Breusch-Godfrey)</div>
+          </div>
+          <p style="margin-top:10px;">Decision: if BP/White rejects → switch to HC1/HC3. If DW shows autocorrelation → HAC/Newey-West. WLS only when you know the variance function.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────── 3. Logit / Probit ─────────── -->
+  <div id="logit" class="section level-green">
+    <div class="section-header">
+      <span class="section-number">03</span>
+      <h2 class="section-title">Logit / Probit</h2>
+    </div>
+    <div class="card">
+      <div class="card-grid">
+        <div class="card-field">
+          <h4>When to Use</h4>
+          <p>Binary outcome (0/1). Logit gives odds ratios; Probit gives latent-index interpretation. Logit is default; Probit when you need normal CDF link.</p>
+        </div>
+        <div class="card-field">
+          <h4>Key Assumptions</h4>
+          <ul>
+            <li>Binary dependent variable</li>
+            <li>Independence of irrelevant alternatives (IIA) for logit</li>
+            <li>No perfect separation</li>
+            <li>Adequate sample size (rule of 10 events per covariate)</li>
+          </ul>
+        </div>
+        <div class="card-field">
+          <h4>Python</h4>
+          <div class="code-block"><code>import statsmodels.api as sm
+
+# Logit
+m_logit = sm.Logit(y, X).fit()
+print(m_logit.summary())
+
+# Probit
+m_probit = sm.Probit(y, X).fit()
+
+# Marginal effects (crucial for interpretation)
+mfx = m_logit.get_margeff(at='overall')
+print(mfx.summary())</code></div>
+          <p style="margin-top:8px;"><span class="tag">odds ratios</span> <span class="tag">marginal effects</span> <span class="tag">predict()</span></p>
+        </div>
+        <div class="card-field">
+          <h4>Diagnostics</h4>
+          <div class="diagnostics-grid">
+            <div class="diag-item"><strong>Pseudo R²</strong> McFadden's (0.2–0.4 = good fit)</div>
+            <div class="diag-item"><strong>LRT</strong> Likelihood ratio test (overall significance)</div>
+            <div class="diag-item"><strong>Hosmer-Lemeshow</strong> Calibration (p &gt; 0.05 = good)</div>
+            <div class="diag-item"><strong>AUC-ROC</strong> Discrimination (&gt; 0.8 = good)</div>
+          </div>
+          <p style="margin-top:10px;">Always report marginal effects, not just coefficients. Logit coefficients are not directly interpretable.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────── 4. Ordered Logit/Probit ─────────── -->
+  <div id="ordered" class="section level-yellow">
+    <div class="section-header">
+      <span class="section-number">04</span>
+      <h2 class="section-title">Ordered Logit / Probit</h2>
+    </div>
+    <div class="card">
+      <div class="card-grid">
+        <div class="card-field">
+          <h4>When to Use</h4>
+          <p>Ordinal outcome with meaningful order but unequal intervals. Classic case: <strong>NPS</strong> (0–10 scale), Likert scales, credit ratings (AAA → D).</p>
+        </div>
+        <div class="card-field">
+          <h4>Key Assumptions</h4>
+          <ul>
+            <li>Outcome is ordinal (ordered categories)</li>
+            <li><strong>Proportional odds assumption</strong>: effects are constant across all cutpoints</li>
+            <li>Latent variable is continuous + logistic/normal</li>
+            <li>Categories are correctly ordered</li>
+          </ul>
+        </div>
+        <div class="card-field">
+          <h4>Python</h4>
+          <div class="code-block"><code>from statsmodels.miscmodels.ordinal_model import OrderedModel
+
+# Ordered Logit
+m_ologit = OrderedModel(y, X, distr='logit').fit()
+
+# Ordered Probit
+m_oprobit = OrderedModel(y, X, distr='probit').fit()
+
+# Cutpoints are estimated, not specified
+print(m_ologit.summary())</code></div>
+          <p style="margin-top:8px;"><span class="tag">cutpoints</span> <span class="tag">proportional odds</span> <span class="tag">brant test</span></p>
+        </div>
+        <div class="card-field">
+          <h4>Diagnostics</h4>
+          <div class="diagnostics-grid">
+            <div class="diag-item"><strong>Brant test</strong> Proportional odds (p &gt; 0.05 = assumption holds)</div>
+            <div class="diag-item"><strong>LRT</strong> Overall model significance</div>
+            <div class="diag-item"><strong>Predicted probabilities</strong> Per category</div>
+            <div class="diag-item"><strong>Cutpoint monotonicity</strong> Cutpoints must increase</div>
+          </div>
+          <p style="margin-top:10px;">If Brant test fails → consider generalized ordered logit (partial proportional odds) or collapse categories.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────── 5. Grouped Logit ─────────── -->
+  <div id="grouped" class="section level-yellow">
+    <div class="section-header">
+      <span class="section-number">05</span>
+      <h2 class="section-title">Grouped Logit</h2>
+    </div>
+    <div class="card">
+      <div class="card-grid">
+        <div class="card-field">
+          <h4>When to Use</h4>
+          <p>Aggregated binary data. E.g., NPS by region: each row is a region with count of promoters/detractors. Much faster than individual-level logit when data is summarized.</p>
+        </div>
+        <div class="card-field">
+          <h4>Key Assumptions</h4>
+          <ul>
+            <li>Data is grouped: success count + total count per row</li>
+            <li>Binomial distribution within groups</li>
+            <li>Independence across groups</li>
+            <li>Variance = n·p·(1−p) per group</li>
+          </ul>
+        </div>
+        <div class="card-field">
+          <h4>Python</h4>
+          <div class="code-block"><code>import statsmodels.api as sm
+
+# y = [successes, failures] per group
+# X = group-level predictors
+y_grouped = np.column_stack([nps_promoters, nps_detractors])
+
+m = sm.GLM(
+    y_grouped, X,
+    family=sm.families.Binomial()
+).fit()
+
+print(m.summary())</code></div>
+          <p style="margin-top:8px;"><span class="tag">GLM</span> <span class="tag">Binomial</span> <span class="tag">weighted</span> <span class="tag">aggregate</span></p>
+        </div>
+        <div class="card-field">
+          <h4>Diagnostics</h4>
+          <div class="diagnostics-grid">
+            <div class="diag-item"><strong>Residual deviance</strong> Over/under-dispersion</div>
+            <div class="diag-item"><strong>Pearson χ²</strong> Goodness of fit</div>
+            <div class="diag-item"><strong>AIC/BIC</strong> Model comparison</div>
+            <div class="diag-item"><strong>Deviance residuals</strong> Per-group fit</div>
+          </div>
+          <p style="margin-top:10px;">If overdispersion detected → use quasi-binomial family or switch to beta-binomial.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────── 6. Poisson / Neg. Binomial ─────────── -->
+  <div id="poisson" class="section level-yellow">
+    <div class="section-header">
+      <span class="section-number">06</span>
+      <h2 class="section-title">Poisson / Negative Binomial</h2>
+    </div>
+    <div class="card">
+      <div class="card-grid">
+        <div class="card-field">
+          <h4>When to Use</h4>
+          <p>Count data (non-negative integers: number of claims, visits, defaults). Poisson is the baseline; Negative Binomial when overdispersion is present (variance > mean).</p>
+        </div>
+        <div class="card-field">
+          <h4>Key Assumptions</h4>
+          <ul>
+            <li>Poisson: mean = variance (equidispersion)</li>
+            <li>Neg. Binomial: variance = μ + αμ² (allows overdispersion)</li>
+            <li>Counts are independent</li>
+            <li>Log link: log(E[y]) = Xβ → multiplicative effects</li>
+          </ul>
+        </div>
+        <div class="card-field">
+          <h4>Python</h4>
+          <div class="code-block"><code>import statsmodels.api as sm
+
+# Poisson
+m_pois = sm.GLM(
+    y, X, family=sm.families.Poisson()
+).fit()
+
+# Negative Binomial
+m_nb = sm.GLM(
+    y, X,
+    family=sm.families.NegativeBinomial()
+).fit()
+
+# Or via discrete model
+m_nb2 = sm.NegativeBinomial(y, X).fit()</code></div>
+          <p style="margin-top:8px;"><span class="tag">GLM</span> <span class="tag">log link</span> <span class="tag">incidence rate ratio</span></p>
+        </div>
+        <div class="card-field">
+          <h4>Diagnostics</h4>
+          <div class="diagnostics-grid">
+            <div class="diag-item"><strong>Cameron-Trivedi</strong> Overdispersion test</div>
+            <div class="diag-item"><strong>Likelihood ratio</strong> Poisson vs NegBin (α = 0?)</div>
+            <div class="diag-item"><strong>PEARSON χ²/df</strong> Dispersion ratio (≈1 = good)</div>
+            <div class="diag-item"><strong>Vuong test</strong> Poisson vs NegBin comparison</div>
+          </div>
+          <p style="margin-top:10px;">Exponentiated coefficients = Incidence Rate Ratios (IRR). IRR = 1.05 → 5% increase in expected count per unit increase in X.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────── 7. Panel Models ─────────── -->
+  <div id="panel" class="section level-yellow">
+    <div class="section-header">
+      <span class="section-number">07</span>
+      <h2 class="section-title">Panel Models (FE / RE)</h2>
+    </div>
+    <div class="card">
+      <div class="card-grid">
+        <div class="card-field">
+          <h4>When to Use</h4>
+          <p>Cross-sectional time series: multiple units observed over time. Individual effects (heterogeneity) need to be absorbed. Classic: firm-level data, country panels, household longitudinal.</p>
+        </div>
+        <div class="card-field">
+          <h4>Key Assumptions</h4>
+          <ul>
+            <li><strong>FE</strong>: unit effects correlate with regressors (absorbs all time-invariant heterogeneity)</li>
+            <li><strong>RE</strong>: unit effects are random/uncorrelated with regressors</li>
+            <li>Exogeneity conditional on unit effects</li>
+            <li>No lagged dependent variable in FE (Nickell bias)</li>
+          </ul>
+        </div>
+        <div class="card-field">
+          <h4>Python</h4>
+          <div class="code-block"><code>from linearmodels.panel import PanelOLS, RandomEffects
+
+# Set multi-index: (entity, time)
+df = df.set_index(['firm', 'year'])
+
+# Fixed Effects
+fe = PanelOLS(y, X, entity_effects=True,
+              time_effects=True).fit()
+
+# Random Effects
+re = RandomEffects(y, X).fit()
+
+# Hausman test
+from linearmodels.panel import compare
+print(compare({'FE': fe, 'RE': re}))</code></div>
+          <p style="margin-top:8px;"><span class="tag">linearmodels</span> <span class="tag">entity_effects</span> <span class="tag">time_effects</span></p>
+        </div>
+        <div class="card-field">
+          <h4>Diagnostics</h4>
+          <div class="diagnostics-grid">
+            <div class="diag-item"><strong>Hausman test</strong> FE vs RE (p &lt; 0.05 → use FE)</div>
+            <div class="diag-item"><strong>F-test</strong> Entity effects significance</div>
+            <div class="diag-item"><strong>Wooldridge</strong> Serial correlation in FE</div>
+            <div class="diag-item"><strong>Cluster SE</strong> Robust to within-group correlation</div>
+          </div>
+          <p style="margin-top:10px;">Default: FE is safer (no correlation assumption). RE only when you need to estimate time-invariant effects or predict random intercepts.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────── 8. Time Series ─────────── -->
+  <div id="timeseries" class="section level-yellow">
+    <div class="section-header">
+      <span class="section-number">08</span>
+      <h2 class="section-title">Time Series (ARIMA / VAR)</h2>
+    </div>
+    <div class="card">
+      <div class="card-grid">
+        <div class="card-field">
+          <h4>When to Use</h4>
+          <p>Single or multiple time series. ARIMA for univariate forecasting; VAR for multivariate dynamics. Cointegration for long-run equilibrium relationships.</p>
+        </div>
+        <div class="card-field">
+          <h4>Key Assumptions</h4>
+          <ul>
+            <li>Stationarity (or cointegrated if non-stationary)</li>
+            <li>ARIMA: (p,d,q) orders capture dynamics</li>
+            <li>VAR: all variables are endogenous</li>
+            <li>Cointegration: long-run equilibrium + short-run adjustment</li>
+          </ul>
+        </div>
+        <div class="card-field">
+          <h4>Python</h4>
+          <div class="code-block"><code>from statsmodels.tsa.arima.model import ARIMA
+from statsmodels.tsa.api import VAR
+from statsmodels.tsa.stattools import adfuller
+
+# Stationarity test
+adf = adfuller(y)
+
+# ARIMA(p,d,q)
+m_arima = ARIMA(y, order=(1,1,1)).fit()
+
+# VAR
+model = VAR(df[['y1','y2','y3']])
+results = model.fit(maxlags=4)
+print(results.summary())</code></div>
+          <p style="margin-top:8px;"><span class="tag">ADF test</span> <span class="tag">Johansen</span> <span class="tag">Granger causality</span> <span class="tag">IRF</span></p>
+        </div>
+        <div class="card-field">
+          <h4>Diagnostics</h4>
+          <div class="diagnostics-grid">
+            <div class="diag-item"><strong>ADF / KPSS</strong> Unit root tests</div>
+            <div class="diag-item"><strong>ACF / PACF</strong> Identify p, q orders</div>
+            <div class="diag-item"><strong>Johansen</strong> Cointegration rank</div>
+            <div class="diag-item"><strong>Ljung-Box</strong> Residual autocorrelation</div>
+          </div>
+          <p style="margin-top:10px;">Pipeline: (1) test stationarity → (2) difference if needed → (3) identify orders via ACF/PACF → (4) estimate → (5) check residuals white noise.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────── 9. Tree / RF / XGBoost ─────────── -->
+  <div id="tree" class="section level-red">
+    <div class="section-header">
+      <span class="section-number">09</span>
+      <h2 class="section-title">Decision Tree / Random Forest / XGBoost</h2>
+    </div>
+    <div class="card">
+      <div class="card-grid">
+        <div class="card-field">
+          <h4>When to Use</h4>
+          <p>Non-linear relationships, high-dimensional data, interactions without specification. Prediction-first problems. When interpretability is secondary to accuracy — but <strong>SHAP is mandatory</strong> to open the black box.</p>
+        </div>
+        <div class="card-field">
+          <h4>Key Assumptions</h4>
+          <ul>
+            <li>No linearity assumption (strength + weakness)</li>
+            <li>Trees handle interactions automatically</li>
+            <li>RF: bagging reduces variance</li>
+            <li>XGBoost: boosting reduces bias (sequential correction)</li>
+          </ul>
+        </div>
+        <div class="card-field">
+          <h4>Python</h4>
+          <div class="code-block"><code>from sklearn.ensemble import RandomForestClassifier
+import xgboost as xgb
+import shap
+
+# Random Forest
+rf = RandomForestClassifier(
+    n_estimators=500, max_depth=8,
+    min_samples_leaf=20, random_state=42
+).fit(X_train, y_train)
+
+# XGBoost
+xgb_model = xgb.XGBClassifier(
+    n_estimators=300, learning_rate=0.05,
+    max_depth=6, subsample=0.8
+).fit(X_train, y_train)
+
+# SHAP — MANDATORY
+explainer = shap.TreeExplainer(xgb_model)
+shap_values = explainer.shap_values(X_test)
+shap.summary_plot(shap_values, X_test)</code></div>
+          <p style="margin-top:8px;"><span class="tag tag-red">SHAP required</span> <span class="tag">sklearn</span> <span class="tag">xgboost</span></p>
+        </div>
+        <div class="card-field">
+          <h4>Diagnostics</h4>
+          <div class="diagnostics-grid">
+            <div class="diag-item"><strong>SHAP values</strong> Feature importance (per-prediction)</div>
+            <div class="diag-item"><strong>Cross-validation</strong> Out-of-sample performance</div>
+            <div class="diag-item"><strong>Learning curves</strong> Overfitting / underfitting</div>
+            <div class="diag-item"><strong>Permutation importance</strong> Robustness check</div>
+          </div>
+          <p style="margin-top:10px;">Rules: (1) Never deploy without SHAP summary + dependence plots. (2) Compare against a simple econometric baseline. (3) Report both in-sample and out-of-sample metrics.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────── 10. Model Selection ─────────── -->
+  <div id="selection" class="section level-yellow">
+    <div class="section-header">
+      <span class="section-number">10</span>
+      <h2 class="section-title">Model Selection</h2>
+    </div>
+    <div class="card">
+      <div class="card-grid">
+        <div class="card-field">
+          <h4>When to Use</h4>
+          <p>Every time. Model selection is not a step — it's a mindset. You're always comparing at least two candidates with different assumptions, complexity levels, and error trade-offs.</p>
+        </div>
+        <div class="card-field">
+          <h4>Information Criteria</h4>
+          <ul>
+            <li><strong>AIC</strong>: -2ln(L) + 2k. Prediction-oriented. Favors larger models.</li>
+            <li><strong>BIC</strong>: -2ln(L) + k·ln(n). Consistent. Favors parsimony.</li>
+            <li><strong>HQIC</strong>: compromise between AIC and BIC.</li>
+            <li>Lower is always better. Differences &gt; 10 = substantial evidence.</li>
+          </ul>
+        </div>
+        <div class="card-field">
+          <h4>Python</h4>
+          <div class="code-block"><code>import statsmodels.api as sm
+
+# Compare models
+m1 = sm.OLS(y, X1).fit()
+m2 = sm.OLS(y, X2).fit()
+
+print(f"AIC: {m1.aic:.1f} vs {m2.aic:.1f}")
+print(f"BIC: {m1.bic:.1f} vs {m2.bic:.1f}")
+
+# Likelihood ratio test
+from scipy.stats import chi2
+lr = 2 * (m2.llf - m1.llf)
+df = m2.df_model - m1.df_model
+p = chi2.sf(lr, df)
+
+# K-fold cross-validation
+from sklearn.model_selection import cross_val_score
+scores = cross_val_score(model, X, y, cv=5,
+                         scoring='neg_mean_squared_error')</code></div>
+          <p style="margin-top:8px;"><span class="tag">AIC</span> <span class="tag">BIC</span> <span class="tag">LRT</span> <span class="tag">k-fold CV</span></p>
+        </div>
+        <div class="card-field">
+          <h4>When to Switch Models</h4>
+          <div class="diagnostics-grid">
+            <div class="diag-item"><strong>Misspecification</strong> RESET test fails → try log-transform or tree</div>
+            <div class="diag-item"><strong>Heteroscedasticity</strong> BP rejects → robust SE or WLS</div>
+            <div class="diag-item"><strong>Non-linearity</strong> Residuals show pattern → polynomial or tree</div>
+            <div class="diag-item"><strong>Overfitting</strong> CV gap widens → regularize (LASSO, Ridge, shrink trees)</div>
+          </div>
+          <p style="margin-top:10px;">Philosophy: start simple (OLS), justify complexity with evidence. The economist's default is parsimony; the ML engineer's default is accuracy. You need both.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+</div>
+</body>
+</html>

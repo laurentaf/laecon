@@ -1,0 +1,269 @@
+[project]
+name = "laecon"
+version = "0.1.0.dev0"  # PEP 440 dev release; conceptual label is "0.1.0-BASIC" (see laecon/__init__.py)
+description = "Capability LAOS para econometria + ML interpretavel com likelihood explicita. Econometria e a espinha, ML e o musculo."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [
+    { name = "LAOS Contributors" }
+]
+keywords = [
+    "econometrics",
+    "interpretable-ml",
+    "nps",
+    "causal-inference",
+    "laos",
+    "ordered-logit",
+    "likelihood-explicit",
+    "panel-data",
+    "time-series",
+]
+
+# ============================================================
+# MAIN DEPENDENCIES — instaladas por padrao com `uv sync`
+# Estas sao as principais bibliotecas da area (econometria +
+# ML classico + gradient boosting + interpretabilidade + tuning
+# + visualizacao) que o usuario pediu para ter disponiveis.
+# ============================================================
+dependencies = [
+    # --- MCP / infrastructure ---
+    "mcp[cli]>=1.0.0",
+    "pydantic>=2.0.0",
+
+    # --- Utilities (sempre uteis, leves) ---
+    "python-dotenv>=1.0.0",
+    "pyyaml>=6.0.1",
+    "tqdm>=4.66.0",
+    "joblib>=1.3.0",
+    "tabulate>=0.9.0",
+    "requests>=2.31.0",
+
+    # --- Numerics + data ---
+    "numpy>=1.24.0",
+    "pandas>=2.0.0",
+    "scipy>=1.11.0",
+
+    # --- Econometrics core (espinha da capability) ---
+    "statsmodels>=0.14.0",     # OLS, GLM, time series, GLS, robust SE, etc.
+    "linearmodels>=4.27.0",    # panel data (FE/RE), IV/2SLS, GMM (DA-1)
+
+    # --- Classical ML ---
+    "scikit-learn>=1.3.0",     # preprocessing, classification metrics, baselines
+
+    # --- Gradient boosting (M2) ---
+    "xgboost>=2.0.0",
+    "lightgbm>=4.1.0",
+    "catboost>=1.2.0",
+
+    # --- Interpretability (M2 — anti-black-box) ---
+    "shap>=0.44.0",            # SHAP values para tree-based (DA-2)
+    "lime>=0.2.0",             # LIME para qualquer modelo
+
+    # --- Hyperparameter tuning ---
+    "optuna>=3.4.0",           # Bayesian optimization
+
+    # --- Visualization (para diagnostic_report) ---
+    "matplotlib>=3.7.0",
+    "seaborn>=0.13.0",
+]
+
+# ============================================================
+# OPTIONAL DEPENDENCIES — instaladas com `uv sync --extra <name>`
+# Modulos especializados opt-in para nao pesar o install default.
+# Use `uv sync --extra full` para tudo de uma vez.
+# ============================================================
+[project.optional-dependencies]
+
+# Dev: testing, linting, type checking
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "ruff>=0.1.0",
+    "mypy>=1.7.0",
+]
+
+# Notebooks: jupyter, lab, kernel, voila (para dashboards)
+notebooks = [
+    "jupyter>=1.0.0",
+    "jupyterlab>=4.0.0",
+    "ipykernel>=6.25.0",
+    "voila>=0.5.0",
+    "nbconvert>=7.9.0",
+]
+
+# Causal inference (M3 — DA-1)
+causal = [
+    "dowhy>=0.11.0",           # DoWhy (Microsoft) — causal graph + estimation
+    "causalml>=0.14.0",        # Uber CausalML — uplift modeling, meta-learners
+    "econml>=0.14.0",          # EconML (Microsoft) — DML, IV, DR, causal trees/forests
+    "zepid>=0.9.1",            # epidemiology-flavored causal (latest 0.9.1)
+]
+
+# Time series (M3 — DA-1)
+timeseries = [
+    "statsmodels[tsa]>=0.14.0",  # ARIMA, VAR, ECM, tests
+    "arch>=6.2.0",               # GARCH, EGARCH, TGARCH
+    "pmdarima>=2.0.0",           # auto-ARIMA
+    "prophet>=1.1.5",            # Facebook Prophet (forecasting)
+    # NOTE: neuralprophet (pydantic 1.x) and great-expectations (altair 4.x)
+    # deferred to M3+ — see ROADMAP.md and tracking meta-project.
+    "tslearn>=0.6.0",            # time series ML
+]
+
+# Interactive visualization (alem de matplotlib/seaborn do main)
+viz = [
+    "plotly>=5.17.0",          # interactive charts
+    "altair>=5.1.0",           # declarative viz
+    "bokeh>=3.2.0",            # web-based interactive
+    "plotnine>=0.12.0",        # ggplot para Python
+    "wordcloud>=1.9.0",        # text viz
+]
+
+# Feature engineering
+feature_eng = [
+    "category-encoders>=2.6.0",   # target encoding, etc
+    "feature-engine>=1.6.0",      # sklearn-compatible transformers
+    "featuretools>=1.27.0",       # automated feature engineering
+    "tsfresh>=0.20.0",            # time series features
+]
+
+# NLP (basico, fora do escopo BASIC mas util)
+nlp = [
+    "nltk>=3.8.0",
+    "spacy>=3.7.0",
+    "textblob>=0.18.0",
+]
+
+# Data validation (DR-1, DR-2)
+validation = [
+    "pandera>=0.17.0",            # dataframe validation
+    # great-expectations deferred to M3+ (altair 4.x pin conflict with viz extras)
+    "pytest-mock>=3.12.0",
+    "pytest-asyncio>=0.23.0",
+]
+
+# Deep learning (M4+ — fora do escopo BASIC)
+dl = [
+    "torch>=2.1.0",               # PyTorch
+    "torchvision>=0.16.0",
+    "pytorch-lightning>=2.1.0",   # training boilerplate
+    "transformers>=4.36.0",        # HuggingFace
+    "datasets>=2.14.0",
+]
+
+# Bayesian / probabilistic
+bayesian = [
+    "pymc>=5.10.0",               # Bayesian modeling
+    "arviz>=0.16.0",              # viz para Bayesian
+    "scipy>=1.11.0",              # ja em main
+    "emcee>=3.1.0",               # MCMC
+]
+
+# Symbolic / math
+symbolic = [
+    "sympy>=1.12.0",
+    "patsy>=0.5.3",               # formulas (ja vem com statsmodels)
+]
+
+# Graphs / networks
+graphs = [
+    "networkx>=3.2.0",
+    "python-igraph>=0.10.0",
+]
+
+# ============================================================
+# FULL — instala todos os extras acima (inlined para evitar
+# recursao laecon[laecon[...]] que falha antes do install).
+# Use: uv sync --extra full
+# ============================================================
+full = [
+    # Dev
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "ruff>=0.1.0",
+    "mypy>=1.7.0",
+    # Notebooks
+    "jupyter>=1.0.0",
+    "jupyterlab>=4.0.0",
+    "ipykernel>=6.25.0",
+    "voila>=0.5.0",
+    "nbconvert>=7.9.0",
+    # Causal inference (M3 — DA-1)
+    "dowhy>=0.11.0",
+    "causalml>=0.14.0",
+    "econml>=0.14.0",
+    "zepid>=0.9.1",
+    # Time series (M3 — DA-1)
+    "statsmodels[tsa]>=0.14.0",
+    "arch>=6.2.0",
+    "pmdarima>=2.0.0",
+    "prophet>=1.1.5",
+    # neuralprophet deferred to M3+ (pydantic 1.x pin)
+    "tslearn>=0.6.0",
+    # Interactive visualization
+    "plotly>=5.17.0",
+    "altair>=5.1.0",
+    "bokeh>=3.2.0",
+    "plotnine>=0.12.0",
+    "wordcloud>=1.9.0",
+    # Feature engineering
+    "category-encoders>=2.6.0",
+    "feature-engine>=1.6.0",
+    "featuretools>=1.27.0",
+    "tsfresh>=0.20.0",
+    # NLP
+    "nltk>=3.8.0",
+    "spacy>=3.7.0",
+    "textblob>=0.18.0",
+    # Data validation (DR-1, DR-2)
+    "pandera>=0.17.0",
+    # great-expectations deferred to M3+ (altair 4.x pin)
+    "pytest-mock>=3.12.0",
+    "pytest-asyncio>=0.23.0",
+    # Deep learning (M4+)
+    "torch>=2.1.0",
+    "torchvision>=0.16.0",
+    "pytorch-lightning>=2.1.0",
+    "transformers>=4.36.0",
+    "datasets>=2.14.0",
+    # Bayesian / probabilistic
+    "pymc>=5.10.0",
+    "arviz>=0.16.0",
+    "emcee>=3.1.0",
+    # Symbolic / math
+    "sympy>=1.12.0",
+    # Graphs / networks
+    "networkx>=3.2.0",
+    "python-igraph>=0.10.0",
+]
+
+[project.scripts]
+laecon-mcp = "laecon.mcp.server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["laecon"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP", "B", "A", "C4", "PT", "RUF"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-ra --strict-markers"

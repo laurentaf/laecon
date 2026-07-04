@@ -1,0 +1,1 @@
+"""LAECON MCP server package."""
